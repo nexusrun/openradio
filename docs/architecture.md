@@ -262,7 +262,6 @@ SEO: `sitemap.ts` lists the top countries, languages and tags only (no millions 
 
 ## 20. Delivery workflow
 
-- Tasks tracked with Backlog.md in `backlog/`.
 - One task per branch (`task-<n>-<slug>`) and PR. Squash merge after checks pass.
 - Commit messages: imperative, prefixed by intent (`Add`, `Fix`, `Update`, `Remove`, `Refactor`, `Test`).
 

@@ -1,0 +1,38 @@
+# Local dependencies and generated output
+node_modules
+.next
+out
+dist
+build
+*.tsbuildinfo
+*.log
+coverage
+playwright-report
+test-results
+
+# Version control and local configuration
+.git
+.env*
+!.env.example
+.DS_Store
+.vscode
+.idea
+.claude
+.codex
+.agents
+
+# Development-only files
+docs
+backlog
+e2e
+test
+**/*.test.*
+**/*.spec.*
+AGENTS.md
+CLAUDE.md
+README.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+playwright.config.ts
+vitest.config.mts
+pnpm-workspace.yaml

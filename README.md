@@ -8,12 +8,9 @@
 </a>
 Live radio from every country, language and genre, in one free and open-source player.
 
-[openradio.space](https://openradio.space) · [Contributing](CONTRIBUTING.md) · [Roadmap](docs/roadmap.md) · [Architecture](docs/architecture.md)
+[openradio.space](https://openradio.space) · [Architecture](docs/architecture.md)
 
-[![CI](https://github.com/raj-khan/openradio/actions/workflows/ci.yml/badge.svg)](https://github.com/raj-khan/openradio/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-ff5a2c.svg)](LICENSE)
-
-<!-- <img src="docs/screenshots/home.webp" alt="OpenRadio home page: a photo of Tokyo at night behind a tuning dial with cities along it" width="900"> -->
 
 [openradio-promo.webm](https://github.com/user-attachments/assets/35633b56-2a41-4809-92d2-818328d55cf8)
 
@@ -33,10 +30,6 @@ This is a personal project, built for the joy of building it. I wanted one calm,
 - **Now playing** song titles when a station broadcasts them, plus lock screen and media key control.
 - **Favorites and history** stored on your device. No account, no tracking.
 - **Installable** as an app, and it keeps working offline for browsing what you already visited.
-
-| Browse and play                                                                               | Now playing                                                                                                         | Ask for a vibe                                                                                          |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| <img src="docs/screenshots/browse.webp" alt="Jazz genre page with station tiles" width="280"> | <img src="docs/screenshots/now-playing.webp" alt="Full screen now playing view with a spinning record" width="280"> | <img src="docs/screenshots/discover.webp" alt="Discovery results for calm jazz from Japan" width="280"> |
 
 ## Quick start
 
@@ -78,18 +71,6 @@ Next.js 16 (App Router) and React 19 in TypeScript, Tailwind CSS v4, Zustand for
 Station data flows through a `StationProvider` interface, so Radio Browser can be swapped or joined by other directories later. Audio is never proxied, recorded or rebroadcast: your browser connects straight to each station.
 
 See [docs/architecture.md](docs/architecture.md) for the full picture and [docs/design.md](docs/design.md) for the visual direction.
-
-## Roadmap
-
-**Now:** the web app, installable and offline capable.
-**Next:** landing pages for genre and country pairs, structured data, a world map, sleep timer, collections and translations.
-**Later:** apps with a shared core for macOS, Windows and Linux, Android and iOS, plus a Chrome extension.
-
-Full list in [docs/roadmap.md](docs/roadmap.md). Want to lead one of the apps? Open an issue and say hello.
-
-## Contributing
-
-Issues, ideas and pull requests are welcome, especially around station quality, translations, accessibility and design. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the task list in [`backlog/`](backlog/).
 
 ## Credits and license
 
