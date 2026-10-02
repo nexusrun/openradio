@@ -1,0 +1,134 @@
+import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
+import { AudioEngine } from "@/components/player/audio-engine";
+import { LibraryHydrator } from "@/components/library/library-hydrator";
+import { MediaSession } from "@/components/player/media-session";
+import { OfflineNotice } from "@/components/pwa/offline-notice";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
+import { AnalyticsConsent } from "@/components/analytics/analytics-consent";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { VisitCounter } from "@/components/analytics/visit-counter";
+import { JsonLd } from "@/components/seo/json-ld";
+import { AmbientBackground } from "@/components/vibe/ambient-background";
+import { VibeController } from "@/components/vibe/vibe-controller";
+import { NowPlayingPoller } from "@/components/player/now-playing-poller";
+import { NowPlayingView } from "@/components/player/now-playing-view";
+import { PlayerBar } from "@/components/player/player-bar";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { goatcounterOrigin } from "@/lib/analytics/goatcounter";
+import { gaMeasurementId } from "@/lib/analytics/google-analytics";
+import {
+  organizationJsonLd,
+  softwareApplicationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo/structured-data";
+import { verificationMetadata } from "@/lib/seo/verification";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, siteUrl } from "@/lib/site";
+import { getLocale } from "@/lib/locale-server";
+import { t } from "@/lib/i18n";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  metadataBase: siteUrl(),
+  title: {
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  appleWebApp: {
+    capable: true,
+    title: SITE_NAME,
+    statusBarStyle: "black-translucent",
+  },
+  keywords: [
+    "open source radio",
+    "world radio",
+    "internet radio",
+    "live radio stations",
+    "online radio player",
+    "free radio streaming",
+  ],
+  alternates: { canonical: "/" },
+  verification: verificationMetadata(),
+  // Titles carry the same template as the document title, so a page that sets
+  // only `title` still previews as itself rather than as the home page.
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: { default: SITE_TITLE, template: `%s | ${SITE_NAME}` },
+    description: SITE_DESCRIPTION,
+    url: "/",
+    locale: "en",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: { default: SITE_TITLE, template: `%s | ${SITE_NAME}` },
+    description: SITE_DESCRIPTION,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0908",
+  colorScheme: "dark",
+};
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Pages render per request so the CSP nonce from proxy.ts can be applied to scripts.
+  await connection();
+  const locale = await getLocale();
+
+  return (
+    <html
+      lang={locale}
+      dir={locale === "ar" ? "rtl" : "ltr"}
+      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col">
+        <a
+          href="#main"
+          className="sr-only z-50 rounded-md bg-accent px-3 py-2 text-accent-contrast focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        >
+          {t(locale, "Skip to content")}
+        </a>
+        <JsonLd data={[organizationJsonLd(), websiteJsonLd(), softwareApplicationJsonLd()]} />
+        <AmbientBackground />
+        <SiteHeader locale={locale} />
+        <OfflineNotice />
+        <main id="main" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+          {children}
+        </main>
+        <SiteFooter locale={locale} />
+        <PlayerBar />
+        <NowPlayingView />
+        <AudioEngine />
+        <MediaSession />
+        <NowPlayingPoller />
+        <VibeController />
+        <ServiceWorkerRegistration />
+        <VisitCounter origin={goatcounterOrigin()} />
+        <GoogleAnalytics />
+        <AnalyticsConsent enabled={gaMeasurementId() !== null} />
+        <LibraryHydrator />
+        <div aria-hidden="true" style={{ height: "var(--player-space)" }} />
+      </body>
+    </html>
+  );
+}

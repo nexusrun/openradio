@@ -1,0 +1,182 @@
+import { expect, test } from "@playwright/test";
+
+const TOKYO = "11111111-1111-4111-8111-111111111111";
+
+test("home page tunes the world @mobile", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Tune the");
+  await expect(page.getByRole("slider", { name: "Tune to a city" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What's the mood?" })).toBeVisible();
+  await expect(
+    page.getByRole("list", { name: "Most played stations" }).getByRole("listitem"),
+  ).toHaveCount(6);
+});
+
+test("dial tunes with the keyboard", async ({ page }) => {
+  await page.goto("/");
+  const dial = page.getByRole("slider", { name: "Tune to a city" });
+  await dial.focus();
+  // The opening place rotates every cache window, so assert movement rather
+  // than a particular city: pinning one made this pass only some of the time.
+  const before = await dial.getAttribute("aria-valuetext");
+  expect(before).toBeTruthy();
+  await page.keyboard.press("ArrowRight");
+  await expect(dial).not.toHaveAttribute("aria-valuetext", before!);
+  const after = await dial.getAttribute("aria-valuetext");
+  await expect(page.getByRole("button", { name: `Tune in to ${after}` })).toBeVisible();
+});
+
+test("search filters sync with the URL", async ({ page }) => {
+  await page.goto("/search");
+  await page.getByLabel("Country").selectOption("JP");
+  await expect(page).toHaveURL(/country=JP/);
+  const results = page.getByRole("list", { name: "Search results" });
+  await expect(results.getByRole("listitem")).toHaveCount(2);
+  await expect(results).toContainText("Tokyo Jazz Test FM");
+
+  await page.getByLabel("Station name").fill("osaka");
+  await page.getByLabel("Station name").press("Enter");
+  await expect(page).toHaveURL(/text=osaka/);
+  await expect(results.getByRole("listitem")).toHaveCount(1);
+
+  await page.reload();
+  await expect(page.getByLabel("Country")).toHaveValue("JP");
+  await expect(page.getByLabel("Station name")).toHaveValue("osaka");
+});
+
+test("station page shows details and similar stations", async ({ page }) => {
+  await page.goto("/tag/jazz");
+  await page.getByRole("link", { name: "Tokyo Jazz Test FM" }).click();
+  await expect(page).toHaveURL(new RegExp(`/station/${TOKYO}`));
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Tokyo Jazz Test FM");
+  await expect(page.getByRole("heading", { name: "Similar stations" })).toBeVisible();
+  await expect(page).toHaveTitle(/Tokyo Jazz Test FM \(Japan\)/);
+});
+
+test("play and pause toggle the player @mobile", async ({ page }) => {
+  await page.goto(`/station/${TOKYO}`);
+  await page.getByRole("button", { name: "Play Tokyo Jazz Test FM" }).first().click();
+  const status = page.getByTestId("player-status");
+  await expect(status).toHaveText("Live", { timeout: 15_000 });
+  await expect(page.getByRole("region", { name: "Player" })).toContainText("Tokyo Jazz Test FM");
+
+  await page
+    .getByRole("region", { name: "Player" })
+    .getByRole("button", { name: /^Pause/ })
+    .click();
+  await expect(status).toHaveText("Paused");
+
+  await page.getByRole("button", { name: "Close player" }).click();
+  await expect(page.getByRole("region", { name: "Player" })).toHaveCount(0);
+});
+
+test("favorites persist after reload", async ({ page }) => {
+  await page.goto("/country/fr");
+  await page.getByRole("button", { name: "Add Paris Test News to favorites" }).click();
+  await page.goto("/favorites");
+  const list = page.getByRole("list", { name: "Favorite stations" });
+  await expect(list.getByRole("listitem")).toHaveCount(1);
+  await page.reload();
+  await expect(list).toContainText("Paris Test News");
+  await page.getByRole("button", { name: "Remove Paris Test News from favorites" }).click();
+  await expect(page.getByText("No presets saved yet")).toBeVisible();
+});
+
+test("natural language discovery finds stations", async ({ page }) => {
+  await page.goto("/discover?q=calm%20jazz%20from%20japan");
+  await expect(page.getByText("Calm · Jazz · Japan")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Discovered stations" })).toContainText(
+    "Tokyo Jazz Test FM",
+  );
+});
+
+test("unknown pages render the off the dial screen", async ({ page }) => {
+  const response = await page.goto("/station/99999999-9999-4999-8999-999999999999");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Off the dial" })).toBeVisible();
+});
+
+test("history fits a phone screen with long station names @mobile", async ({ page }) => {
+  // A fixed side gutter for the timestamp used to squeeze the card until the
+  // page scrolled sideways, so seed the longest name we have seen in the wild.
+  await page.goto("/");
+  await page.evaluate(() => {
+    const station = {
+      id: "22222222-2222-4222-8222-222222222222",
+      name: "CAPITAL - The UK's No.1 Hit Music Station",
+      streamUrl: "https://example.invalid/stream",
+      country: "United Kingdom",
+      countryCode: "GB",
+      languages: ["english"],
+      tags: ["capital", "capital fm", "contemporary hits radio"],
+      codec: "MP3",
+      bitrate: 128,
+      isHls: false,
+      votes: 0,
+      clickCount: 0,
+      lastCheckOk: true,
+      source: "radio-browser",
+    };
+    localStorage.setItem(
+      "openradio:history",
+      JSON.stringify({ state: { entries: [{ station, playedAt: Date.now() }] }, version: 1 }),
+    );
+  });
+
+  await page.goto("/history");
+  // Direct children only: each card nests a tag list of its own.
+  await expect(page.getByRole("list", { name: "Recently played" }).locator("> li")).toHaveCount(1);
+
+  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+});
+
+test("every country is reachable from the home page", async ({ page }) => {
+  // The dial carries 16 curated places; the directory has well over 200. Before
+  // this, the rest could not be reached from the home page at all.
+  await page.goto("/");
+  await page.getByRole("button", { name: "All countries" }).click();
+
+  const dialog = page.getByRole("dialog", { name: "Choose a country" });
+  await expect(dialog).toBeVisible();
+  const search = page.getByRole("textbox", { name: "Search countries" });
+  await expect(search).toBeFocused();
+
+  const countries = page.getByRole("list", { name: "Countries" }).getByRole("listitem");
+  const all = await countries.count();
+  expect(all).toBeGreaterThan(1);
+
+  await search.fill("fran");
+  await expect(countries).toHaveCount(1);
+  await expect(countries.first()).toContainText("France");
+
+  await search.fill("zzzz");
+  await expect(page.getByText(/Nothing matches/)).toBeVisible();
+
+  // Escape must close it: a type="search" input would swallow the first press.
+  await search.fill("");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+
+  await page.getByRole("button", { name: "All countries" }).click();
+  await page.getByRole("textbox", { name: "Search countries" }).fill("fran");
+  await countries.first().getByRole("button").click();
+  await expect(page).toHaveURL(/\/country\/fr$/);
+});
+
+test("the dial can be stepped without dragging it @mobile", async ({ page }) => {
+  // There is no keyboard on a touch screen, so the slider's arrow keys are out
+  // of reach and dragging a scale with a thumb is fiddly.
+  await page.goto("/");
+  const dial = page.getByRole("slider", { name: "Tune to a city" });
+  const first = await dial.getAttribute("aria-valuetext");
+
+  await page.getByRole("button", { name: /^Next:/ }).click();
+  await expect(dial).not.toHaveAttribute("aria-valuetext", first!);
+
+  await page.getByRole("button", { name: /^Previous:/ }).click();
+  await expect(dial).toHaveAttribute("aria-valuetext", first!);
+});

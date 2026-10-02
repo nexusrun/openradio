@@ -1,0 +1,66 @@
+"use client";
+
+import { Clock, Compass, Heart, Radio, Search, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { SurpriseButton } from "@/components/discovery/surprise-button";
+import { Logo } from "@/components/layout/logo";
+import { MAIN_NAV } from "@/lib/navigation";
+import { LanguageSelect } from "@/components/layout/language-select";
+import { t } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n-data";
+
+const ICONS = {
+  "/": Radio,
+  "/search": Search,
+  "/discover": Sparkles,
+  "/favorites": Heart,
+  "/history": Clock,
+} as Record<string, typeof Compass>;
+
+const NAV = MAIN_NAV.map((item) => ({ ...item, icon: ICONS[item.href] ?? Compass }));
+
+function isActive(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
+
+export function SiteHeader({ locale }: { locale: Locale }) {
+  const pathname = usePathname();
+
+  return (
+    <header className="glossy-panel sticky top-0 z-30 border-b border-border/60 bg-background/80">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4">
+        <Link href="/" className="flex items-center gap-2 rounded-md font-semibold tracking-tight">
+          <Logo className="size-7 text-text" />
+          <span className="hidden sm:inline">OpenRadio</span>
+          <span className="sr-only sm:hidden">OpenRadio home</span>
+        </Link>
+        <nav aria-label={t(locale, "Main")}>
+          <ul className="flex items-center gap-1">
+            {NAV.map(({ href, label, icon: Icon }) => {
+              const active = isActive(pathname, href);
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                      active ? "bg-surface-strong text-text" : "text-muted hover:text-text"
+                    }`}
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                    <span className="sr-only md:not-sr-only">{t(locale, label)}</span>
+                  </Link>
+                </li>
+              );
+            })}
+            <li>
+              <SurpriseButton variant="compact" />
+            </li>
+            <li><LanguageSelect locale={locale} /></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
+}
