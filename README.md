@@ -3,18 +3,18 @@
 # OpenRadio
 
 **Explore the world through radio.**
-<a href="https://nexusai.run/deploy?repo=https://github.com/nexusrun/openradio">
-  <img src="https://nexusai.run/deploy-button.svg" alt="Deploy to NEXUS AI" height="36">
-</a>
-Live radio from every country, language and genre, in one free and open-source player.
 
-[openradio.space](https://openradio.space) · [Architecture](docs/architecture.md)
+[openradio](https://openradio.nexusai.run) · [Architecture](docs/architecture.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-ff5a2c.svg)](LICENSE)
 
 [openradio-promo.webm](https://github.com/user-attachments/assets/35633b56-2a41-4809-92d2-818328d55cf8)
 
 </div>
+
+<a href="https://nexusai.run/deploy?repo=https://github.com/nexusrun/openradio">
+  <img src="https://nexusai.run/deploy-button.svg" alt="Deploy to NEXUS AI" height="36">
+</a>
 
 ## Why this exists
 
