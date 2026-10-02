@@ -1,3 +1,7 @@
+<a href="https://nexusai.run/deploy?repo=https://github.com/nexusrun/openradio">
+  <img src="https://nexusai.run/deploy-button.svg" alt="Deploy to NEXUS AI" height="36">
+</a>
+
 <div align="center">
 
 # OpenRadio
@@ -11,10 +15,6 @@
 [openradio-promo.webm](https://github.com/user-attachments/assets/35633b56-2a41-4809-92d2-818328d55cf8)
 
 </div>
-
-<a href="https://nexusai.run/deploy?repo=https://github.com/nexusrun/openradio">
-  <img src="https://nexusai.run/deploy-button.svg" alt="Deploy to NEXUS AI" height="36">
-</a>
 
 ## Why this exists
 
