@@ -3,7 +3,9 @@
 # OpenRadio
 
 **Explore the world through radio.**
-
+<a href="https://nexusai.run/deploy?repo=https://github.com/nexusrun/openradio">
+  <img src="https://nexusai.run/deploy-button.svg" alt="Deploy to NEXUS AI" height="36">
+</a>
 Live radio from every country, language and genre, in one free and open-source player.
 
 [openradio.space](https://openradio.space) · [Contributing](CONTRIBUTING.md) · [Roadmap](docs/roadmap.md) · [Architecture](docs/architecture.md)
