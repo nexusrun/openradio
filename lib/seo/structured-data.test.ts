@@ -84,7 +84,7 @@ describe("entity data", () => {
     const data = organizationJsonLd();
     expect(data["@type"]).toBe("Organization");
     expect(data["@id"]).toBe(`${url}#organization`);
-    expect(data.sameAs).toContain("https://github.com/raj-khan/openradio");
+    expect(data.sameAs).toContain("https://github.com/nexusrun/openradio");
     expect(isAbsolute((data.logo as Record<string, unknown>).url)).toBe(true);
   });
 
